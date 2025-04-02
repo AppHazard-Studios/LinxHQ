@@ -7,29 +7,32 @@
 ---
 
 ## 🚘 Overview
-**LinksHQ** is a web link launcher built for Android-based car tablets.  
-Many head units don’t support PWAs or saving websites to the home screen — LinksHQ solves that.
+**LinksHQ** is a lightweight web launcher built for Android-based car tablets.  
+Many head units don’t support PWAs or saving websites to the home screen — LinksHQ makes it easy.
 
-Just launch the app to access your custom web shortcuts through a clean, easy-to-use interface designed for in-car use.
+Open the app and tap your custom website buttons — no digging through bookmarks, no clutter, just fast access through a car-friendly layout.
 
 ---
 
 ## ✅ Key Features
-- **Add any website** — Enter the URL, name it, and choose a custom icon
-- **Car-optimised layout** — Big buttons, dark mode, distraction-free
-- **Fast access** — One tap to launch your saved sites
-- **No internet required** — Once set up, the app works offline
-- **No root needed** — Works on any Android tablet that allows app installs
+- **Add any website** — Name it, assign a custom icon, and launch with one tap
+- **Car-optimised layout** — Large buttons and a clean, dark interface for easy use in the car
+- **100% offline** — The app runs completely offline and launches sites using your default browser
+- **No ads, ever** — Distraction-free and private
+- **No root required** — Works on any Android tablet that allows app installs
 
 ---
 
 ## 🔧 Compatibility
-LinksHQ works on **any Android tablet** installed in your vehicle — as long as you can sideload or install apps.
+Works on **any Android-based car tablet** or head unit that supports sideloading or app installation.
 
-> Popular setups include:
+> Common setups include:
 > - BYD Atto 3
 > - BYD SEAL
-> - Android-based head units in various vehicles
+> - BYD Shark
+> - BYD Sea Lion
+> - BYD Dolphin
+> - Other Android-powered head units
 
 ---
 
@@ -62,5 +65,5 @@ For help or feedback, email **apphazardstudios@gmail.com**
 ---
 
 <!--  
-Tags: BYD Atto 3, BYD SEAL, Android car tablet, Android head unit, car browser shortcut, PWA alternative, web launcher for cars, BYD tablet, sideload apps car  
+Tags: BYD Atto 3, BYD SEAL, BYD Dolphin, BYD Shark, BYD Sea Lion, Android car tablet, Android head unit, car browser shortcut, PWA alternative, web launcher for cars, BYD tablet, sideload apps car  
 -->
