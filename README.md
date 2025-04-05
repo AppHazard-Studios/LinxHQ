@@ -59,7 +59,7 @@ Works on **any Android-based car tablet** or head unit that supports sideloading
 <table align="center">
   <tr>
     <td align="center" style="padding: 10px;">
-      <a href="https://github.com/AppHazard-Studios/LinksHQ/releases/latest" style="font-size:18px; font-weight:bold; text-decoration:none;">Download Latest Release</a>
+      <a href="https://github.com/AppHazard-Studios/LinxHQ/releases" style="font-size:18px; font-weight:bold; text-decoration:none;">Download Latest Release</a>
     </td>
     <td align="center" style="padding: 10px;">
       <a href="YOUR_GOOGLE_PLAY_LINK_HERE">
