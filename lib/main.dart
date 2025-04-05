@@ -1,19 +1,67 @@
-import 'dart:async'; // Add this import for Completer
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart';
+import 'dart:math';
 
-void main() => runApp(const LinxHQApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class LinxHQApp extends StatelessWidget {
+  // Lock orientation to landscape mode
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    // Ensure the app uses the entire screen without system UI overlays
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+      overlays: [],
+    );
+    runApp(const LinxHQApp());
+  });
+}
+
+class LinxHQApp extends StatefulWidget {
   const LinxHQApp({super.key});
+
+  @override
+  State<LinxHQApp> createState() => _LinxHQAppState();
+}
+
+class _LinxHQAppState extends State<LinxHQApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Reinforce orientation lock when the app starts
+    _setOrientationLock();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reapply orientation lock when dependencies change
+    _setOrientationLock();
+  }
+
+  void _setOrientationLock() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    // Ensure fullscreen mode
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+      overlays: [],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +70,14 @@ class LinxHQApp extends StatelessWidget {
       theme: ThemeData.dark(useMaterial3: true),
       debugShowCheckedModeBanner: false,
       home: const HomePage(),
+      builder: (context, child) {
+        // This ensures the app fills available space and handles system scaling
+        return MediaQuery(
+          // Prevent system text scaling from affecting our layout calculations
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: child!,
+        );
+      },
     );
   }
 }
@@ -31,7 +87,7 @@ class Tile {
   String title;
   String url;
   String? iconPath;
-  Color? dominantEdgeColor; // New field to store the detected edge color
+  Color? dominantEdgeColor;
 
   Tile({
     required this.id,
@@ -68,15 +124,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  // Constants
-  static const int tilesPerRow = 5;
-  static const int rowsPerPage = 2;
-  static const int tilesPerPage = tilesPerRow * rowsPerPage;
+  // Constants - more adaptive to screen sizes
+  static const int tilesPerRow = 5; // Default tiles per row
+  static const double minAspectRatioForDoubleColumn = 1.2; // Use aspect ratio instead of fixed height
+  static const double minTileSize = 100.0; // Minimum size for tiles to be usable
 
   // State variables
   List<Tile> _tiles = [];
   bool _isLoading = true;
   bool _isEditMode = false;
+  bool _useDoubleColumn = true; // Default to double column, will be adjusted based on screen dimensions
 
   // Controllers
   late final PageController _pageController;
@@ -86,6 +143,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _pageController = PageController();
     _loadTiles();
+
+    // Reinforce orientation lock
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    // Ensure fullscreen mode
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+      overlays: [],
+    );
   }
 
   @override
@@ -119,6 +188,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _addTile(Tile tile) async {
     setState(() => _tiles.add(tile));
     await _saveTiles();
+
+    // Calculate items per page based on current layout
+    final int tilesPerPage = _useDoubleColumn ? tilesPerRow * 2 : tilesPerRow;
 
     // Show the page with the new tile
     if (_tiles.length > tilesPerPage) {
@@ -207,24 +279,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
-    // Calculate pages
-    final pages = <List<Tile>>[];
-    for (int i = 0; i < _tiles.length; i += tilesPerPage) {
-      final end = i + tilesPerPage < _tiles.length ? i + tilesPerPage : _tiles.length;
-      pages.add(_tiles.sublist(i, end));
-    }
-    if (pages.isEmpty) pages.add([]);
+    // Reinforce orientation lock on each build
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        toolbarHeight: 90,
+        toolbarHeight: 90, // Reduced from 90
         title: const Text(
           'LinxHQ',
-          textScaleFactor: 1.0, // This ensures the text stays at the defined size
+          textScaleFactor: 1.0,
           style: TextStyle(
-            fontSize: 50,
+            fontSize: 65, // Reduced from 50
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -249,7 +319,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Text(
                   _isEditMode ? 'Done' : 'Edit',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 26, // Reduced from 24
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -258,16 +328,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
         ),
-        leadingWidth: 100, // Keep this wider for "Done" text
+        leadingWidth: 100,
         actions: [
-          // Add button - centered with proper spacing
           Container(
             margin: const EdgeInsets.only(right: 16),
             width: 50,
             child: Center(
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add, size: 50, color: Color(0xFFFFFFFF)),
+                icon: const Icon(Icons.add, size: 50, color: Color(0xFFFFFFFF)), // Reduced from 50
                 onPressed: () async {
                   if (_isEditMode) {
                     setState(() {
@@ -288,17 +357,93 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
       body: GestureDetector(
         onTap: _isEditMode ? () => _toggleEditMode() : null,
-        behavior: HitTestBehavior.translucent, // Important! Ensures taps on empty space are detected
+        behavior: HitTestBehavior.translucent,
         child: LayoutBuilder(builder: (context, constraints) {
-          // Calculate tile size with increased padding
-          final screenPadding = 28.0;
-          final availableWidth = constraints.maxWidth - (screenPadding * 2);
-          final tileSpacing = 20.0;
-          final tileSize = (availableWidth - ((tilesPerRow-1) * tileSpacing)) / tilesPerRow;
+          // Safe area calculations
+          final safeHeight = constraints.maxHeight;
+          final safeWidth = constraints.maxWidth;
 
-          // Calculate row heights to minimize vertical spacing
-          final availableHeight = constraints.maxHeight - (screenPadding * 2);
-          final rowHeight = availableHeight / 2;
+          // Use simpler logic to determine layout
+          // Force double column on landscape tablets, single column on very narrow screens
+          final useDoubleColumn = safeWidth > 600 && safeHeight > 400;
+
+          // Update state if column layout changed
+          if (_useDoubleColumn != useDoubleColumn) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _useDoubleColumn = useDoubleColumn;
+              });
+            });
+          }
+
+          // Screen padding - smaller for small screens
+          final screenPadding = safeWidth > 600 ? 16.0 : 8.0;
+          final tileSpacing = safeWidth > 600 ? 16.0 : 8.0;
+
+          // Calculate available space after accounting for app bar and paddings
+          final availableWidth = safeWidth - (screenPadding * 2);
+
+          // Calculate the height of each row with margins
+          int rowCount = useDoubleColumn ? 2 : 1;
+          final titleHeight = 36.0; // Fixed title height
+
+          // Calculate tile dimensions
+          int itemsPerRow;
+          double tileSize;
+
+          if (useDoubleColumn) {
+            // For double column (tablet), use fixed 5 items per row
+            itemsPerRow = 5;
+
+            // When calculating available height, use larger title height
+            double titleHeight = 50.0; // Increased from 36.0
+
+            // Maximum available height for content
+            double maxRowHeight = (safeHeight - (screenPadding * 2) - tileSpacing) / rowCount;
+
+            // Height available for the actual tile (minus title)
+            double availableTileHeight = maxRowHeight - titleHeight;
+
+            // Width per tile
+            double availableTileWidth = (availableWidth - (tileSpacing * (itemsPerRow - 1))) / itemsPerRow;
+
+            // Use smaller dimension to ensure square tiles
+            tileSize = min(availableTileWidth, availableTileHeight);
+          } else {
+            // For single column (phone), adapt items per row based on width
+            if (availableWidth >= 500) {
+              itemsPerRow = 5;
+            } else if (availableWidth >= 400) {
+              itemsPerRow = 4;
+            } else if (availableWidth >= 300) {
+              itemsPerRow = 3;
+            } else {
+              itemsPerRow = 2;
+            }
+
+            // For single column, we have more height to work with
+            double availableTileWidth = (availableWidth - (tileSpacing * (itemsPerRow - 1))) / itemsPerRow;
+
+            // Height available after accounting for title and padding
+            double availableHeight = safeHeight - (screenPadding * 2) - titleHeight;
+
+            // Use the smaller dimension to keep tiles square
+            tileSize = min(availableTileWidth, availableHeight);
+          }
+
+          // Ensure minimum size
+          tileSize = max(tileSize, 60.0);
+
+          // Calculate tiles per page
+          final tilesPerPage = itemsPerRow * rowCount;
+
+          // Calculate pages
+          final pages = <List<Tile>>[];
+          for (int i = 0; i < _tiles.length; i += tilesPerPage) {
+            final end = i + tilesPerPage < _tiles.length ? i + tilesPerPage : _tiles.length;
+            pages.add(_tiles.sublist(i, end));
+          }
+          if (pages.isEmpty) pages.add([]);
 
           return Column(
             children: [
@@ -309,41 +454,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   itemCount: pages.length,
                   itemBuilder: (ctx, pageIndex) {
                     return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenPadding,
-                        vertical: screenPadding / 2,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // First row
-                          SizedBox(
-                            height: rowHeight,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: _buildTileRow(
-                                  pages[pageIndex],
-                                  pageIndex * tilesPerPage,
-                                  0,
-                                  tileSize
-                              ),
-                            ),
-                          ),
-                          // No spacing between rows
-                          // Second row
-                          SizedBox(
-                            height: rowHeight,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: _buildTileRow(
-                                  pages[pageIndex],
-                                  pageIndex * tilesPerPage,
-                                  tilesPerRow,
-                                  tileSize
-                              ),
-                            ),
-                          ),
-                        ],
+                      padding: EdgeInsets.all(screenPadding),
+                      child: useDoubleColumn
+                          ? _buildDoubleColumnLayout(
+                        pages[pageIndex],
+                        pageIndex * tilesPerPage,
+                        itemsPerRow,
+                        tileSize,
+                        tileSpacing,
+                      )
+                          : _buildSingleColumnLayout(
+                        pages[pageIndex],
+                        pageIndex * tilesPerPage,
+                        itemsPerRow,
+                        tileSize,
+                        tileSpacing,
                       ),
                     );
                   },
@@ -356,41 +481,137 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> _buildTileRow(List<Tile> pageTiles, int startIndex, int rowOffset, double tileSize) {
-    return List.generate(tilesPerRow, (index) {
+  // Build a double column layout (2 rows)
+  // Build a double column layout (2 rows)
+  Widget _buildDoubleColumnLayout(
+      List<Tile> pageTiles,
+      int startIndex,
+      int itemsPerRow,
+      double tileSize,
+      double tileSpacing,
+      ) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // First row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildTileRow(
+            pageTiles,
+            startIndex,
+            0,
+            itemsPerRow,
+            tileSize,
+            tileSpacing,
+          ),
+        ),
+
+        // Second row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildTileRow(
+            pageTiles,
+            startIndex,
+            itemsPerRow,
+            itemsPerRow,
+            tileSize,
+            tileSpacing,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Build a single column layout (1 row)
+  // Build a single column layout (1 row)
+  Widget _buildSingleColumnLayout(
+      List<Tile> pageTiles,
+      int startIndex,
+      int itemsPerRow,
+      double tileSize,
+      double tileSpacing,
+      ) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Single row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildTileRow(
+            pageTiles,
+            startIndex,
+            0,
+            itemsPerRow,
+            tileSize,
+            tileSpacing,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Build a row of tiles with consistent spacing
+  List<Widget> _buildTileRow(
+      List<Tile> pageTiles,
+      int startIndex,
+      int rowOffset,
+      int itemsPerRow,
+      double tileSize,
+      double tileSpacing,
+      ) {
+    List<Widget> rowTiles = [];
+
+    for (int index = 0; index < itemsPerRow; index++) {
       final tileIndex = startIndex + index + rowOffset;
+
+      // Add the tile or an empty space
       if (tileIndex < _tiles.length) {
-        return AppTile(
-          key: ValueKey(_tiles[tileIndex].id),
-          tile: _tiles[tileIndex],
-          isEditMode: _isEditMode,
-          size: tileSize,
-          onTap: () => _launchUrl(_tiles[tileIndex].url),
-          onDelete: () => _showDeleteConfirmation(_tiles[tileIndex]),
-          onEdit: () => _editTile(_tiles[tileIndex]),
-          onLongPress: _toggleEditMode, // Pass the long press callback
-          onUpdateTileColor: (color) {
-            // Update the tile's dominant edge color
-            setState(() {
-              final tile = _tiles[tileIndex];
-              _tiles[tileIndex] = Tile(
-                id: tile.id,
-                title: tile.title,
-                url: tile.url,
-                iconPath: tile.iconPath,
-                dominantEdgeColor: color,
-              );
-            });
-            _saveTiles();
-          },
+        rowTiles.add(
+          AppTile(
+            key: ValueKey(_tiles[tileIndex].id),
+            tile: _tiles[tileIndex],
+            isEditMode: _isEditMode,
+            size: tileSize, // Now guaranteed to be square
+            onTap: () => _launchUrl(_tiles[tileIndex].url),
+            onDelete: () => _showDeleteConfirmation(_tiles[tileIndex]),
+            onEdit: () => _editTile(_tiles[tileIndex]),
+            onLongPress: _toggleEditMode,
+            onUpdateTileColor: (color) {
+              setState(() {
+                final tile = _tiles[tileIndex];
+                _tiles[tileIndex] = Tile(
+                  id: tile.id,
+                  title: tile.title,
+                  url: tile.url,
+                  iconPath: tile.iconPath,
+                  dominantEdgeColor: color,
+                );
+              });
+              _saveTiles();
+            },
+          ),
         );
+
+        // Add spacing between tiles (but not after the last one)
+        if (index < itemsPerRow - 1) {
+          rowTiles.add(SizedBox(width: tileSpacing));
+        }
       } else {
-        return SizedBox(width: tileSize);
+        // Add an empty space for missing tiles
+        rowTiles.add(SizedBox(width: tileSize));
+
+        // Add spacing between empty spaces (but not after the last one)
+        if (index < itemsPerRow - 1) {
+          rowTiles.add(SizedBox(width: tileSpacing));
+        }
       }
-    });
+    }
+
+    return rowTiles;
   }
 }
 
+// The AppTile class and TileFormDialog remain the same as in your original code
 class AppTile extends StatefulWidget {
   final Tile tile;
   final bool isEditMode;
@@ -398,8 +619,8 @@ class AppTile extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
-  final VoidCallback onLongPress; // New callback for long press
-  final Function(Color) onUpdateTileColor; // Callback to update tile color
+  final VoidCallback onLongPress;
+  final Function(Color) onUpdateTileColor;
 
   const AppTile({
     super.key,
@@ -409,7 +630,7 @@ class AppTile extends StatefulWidget {
     required this.onTap,
     required this.onDelete,
     required this.onEdit,
-    required this.onLongPress, // Add the new parameter
+    required this.onLongPress,
     required this.onUpdateTileColor,
   });
 
@@ -419,15 +640,13 @@ class AppTile extends StatefulWidget {
 
 class _AppTileState extends State<AppTile> {
   Color? _dominantEdgeColor;
-  bool _isAnalyzing = false; // Track if image analysis is in progress
+  bool _isAnalyzing = false;
 
   @override
   void initState() {
     super.initState();
-    // Use the saved color if available
     _dominantEdgeColor = widget.tile.dominantEdgeColor;
 
-    // If the tile has an icon and no saved color, analyze it
     if (widget.tile.iconPath != null && _dominantEdgeColor == null) {
       _analyzeImage();
     }
@@ -437,7 +656,6 @@ class _AppTileState extends State<AppTile> {
   void didUpdateWidget(AppTile oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If the icon path changed, re-analyze the image
     if (widget.tile.iconPath != oldWidget.tile.iconPath) {
       _dominantEdgeColor = widget.tile.dominantEdgeColor;
       if (widget.tile.iconPath != null && _dominantEdgeColor == null) {
@@ -485,7 +703,6 @@ class _AppTileState extends State<AppTile> {
   }
 
   // Find the dominant edge color in an image with transparency
-// Replace the _findDominantEdgeColor method with this improved version
   Future<Color> _findDominantEdgeColor(ui.Image image, Uint8List bytes) async {
     // Default fallback color
     Color defaultColor = const Color(0xFF333333);
@@ -578,152 +795,133 @@ class _AppTileState extends State<AppTile> {
 
   @override
   Widget build(BuildContext context) {
-    // Much larger fixed font size for car tablet viewing
-    const double fixedFontSize = 30; // Increased significantly for tablet in car
+    // Adaptive font size based on tile size
+    final fontSize = widget.size < 80 ? 18.0 :
+    widget.size < 100 ? 22.0 :
+    widget.size < 120 ? 26.0 :
+    30.0;
 
-    return GestureDetector(
-      // Add the long press gesture to trigger edit mode
-      onLongPress: widget.onLongPress,
-      child: SizedBox(
-        width: widget.size,
-        height: widget.size + 36, // Increased height for larger text
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  // Main tile - no shaking animation
-                  // Main tile - no shaking animation
-                  GestureDetector(
-                    onTap: () {
-                      if (widget.isEditMode) {
-                        // Exit edit mode if we tap the tile while in edit mode
-                        widget.onLongPress(); // We're reusing the onLongPress callback as it toggles edit mode
-                      } else {
-                        // Launch URL when not in edit mode (original behavior)
-                        widget.onTap();
-                      }
-                    },
+    // Determine title height based on font size
+    final titleHeight = fontSize <= 22 ? 40.0 :
+    fontSize <= 26 ? 46.0 :
+    50.0;
+
+    // Total height includes adjusted title height
+    return SizedBox(
+      width: widget.size,
+      height: widget.size + titleHeight, // Dynamic total height
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Icon container - strictly square
+          SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: Stack(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (widget.isEditMode) {
+                      widget.onLongPress();
+                    } else {
+                      widget.onTap();
+                    }
+                  },
+                  onLongPress: widget.onLongPress,
+                  child: Container(
+                    width: widget.size,
+                    height: widget.size,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF333333),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: _buildTileIcon(),
+                    ),
+                  ),
+                ),
+
+                if (widget.isEditMode)
+                  Positioned.fill(
                     child: Container(
-                      width: widget.size,
-                      height: widget.size,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF333333),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                      margin: const EdgeInsets.all(8),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: widget.onEdit,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black.withOpacity(0.35),
+                                  ),
+                                  width: min(40, widget.size / 3),
+                                  height: min(40, widget.size / 3),
+                                  child: Icon(
+                                    Icons.edit,
+                                    size: min(24, widget.size / 4),
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+
+                              GestureDetector(
+                                onTap: widget.onDelete,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black.withOpacity(0.35),
+                                  ),
+                                  width: min(40, widget.size / 3),
+                                  height: min(40, widget.size / 3),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: min(28, widget.size / 4),
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: _buildTileIcon(),
-                      ),
                     ),
                   ),
-
-                  // Edit mode controls - Material You style
-// Edit mode controls - Material You style with better contrast
-                  if (widget.isEditMode)
-                    Positioned.fill(
-                      child: Container(
-                        margin: const EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            // Top row with buttons
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Edit button - Material You style
-                                GestureDetector(
-                                  onTap: widget.onEdit,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.black.withOpacity(0.35), // Semi-transparent black background
-                                      //border: Border.all(color: Colors.white30, width: 1), // Subtle white border
-                                      boxShadow: [
-                                        //BoxShadow(
-                                        //  color: Colors.black.withOpacity(0.9),
-                                        //  spreadRadius: 0,
-                                        //  blurRadius: 5,
-                                         // offset: const Offset(0, 1),
-                                        //),
-                                      ],
-                                    ),
-                                    width: 48,
-                                    height: 48,
-                                    child: const Icon(
-                                      Icons.edit,
-                                      size: 28,
-                                      color: Colors.white, // Bright white icon
-                                    ),
-                                  ),
-                                ),
-
-                                // Delete button - Material You style
-                                GestureDetector(
-                                  onTap: widget.onDelete,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.black.withOpacity(0.35), // Semi-transparent black background
-                                      //border: Border.all(color: Colors.white30, width: 1), // Subtle white border
-                                      boxShadow: [
-                                      //  BoxShadow(
-                                      //    color: Colors.black.withOpacity(0.5),
-                                      //    spreadRadius: 1,
-                                      //    blurRadius: 5,
-                                      //    offset: const Offset(0, 2),
-                                      //  ),
-                                      ],
-                                    ),
-                                    width: 48,
-                                    height: 48,
-                                    child: const Icon(
-                                      Icons.close,
-                                      size: 34,
-                                      color: Colors.white, // Bright white icon
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),                ],
-              ),
+              ],
             ),
+          ),
 
-            // Title with larger fixed font size for tablet viewing
-            MediaQuery(
-              // Ignore text scaling for this widget only
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-              child: SizedBox(
-                height: 46, // Taller container for larger text
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    widget.tile.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: fixedFontSize, // Much larger for tablet/car viewing
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          // Title container - dynamic height based on font size
+          SizedBox(
+            height: titleHeight,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text(
+                  widget.tile.title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w500,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -752,10 +950,12 @@ class _AppTileState extends State<AppTile> {
   Widget _buildGenericIcon() {
     return Container(
       color: const Color(0xFF2C2C2E),
-      child: const Center(
+      child: Center(
         child: Icon(
           Icons.link_outlined,
-          size: 60,
+          // Adaptive icon size
+          size: widget.size < 80 ? 30 :
+          widget.size < 120 ? 40 : 60,
           color: Colors.white70,
         ),
       ),
@@ -763,6 +963,7 @@ class _AppTileState extends State<AppTile> {
   }
 }
 
+// TileFormDialog class unchanged
 class TileFormDialog extends StatefulWidget {
   final Tile? tile;
   final Function(Tile)? onSave;
@@ -856,7 +1057,6 @@ class _TileFormDialogState extends State<TileFormDialog> {
     try {
       String? iconPath = widget.tile?.iconPath;
 
-      // Save new image if selected
       if (_iconFile != null &&
           (widget.tile?.iconPath == null ||
               _iconFile!.path != widget.tile!.iconPath)) {
@@ -873,7 +1073,7 @@ class _TileFormDialogState extends State<TileFormDialog> {
         title: _titleController.text.trim(),
         url: url,
         iconPath: iconPath,
-        dominantEdgeColor: widget.tile?.dominantEdgeColor, // Preserve the color if editing
+        dominantEdgeColor: widget.tile?.dominantEdgeColor,
       );
 
       if (widget.onSave != null) {
@@ -919,17 +1119,13 @@ class _TileFormDialogState extends State<TileFormDialog> {
                 ),
                 const SizedBox(height: 24),
 
-                // Modern UI with preview
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tile preview with overlay edit icon
                     Column(
                       children: [
-                        // Icon preview with edit overlay
                         Stack(
                           children: [
-                            // Icon
                             Container(
                               width: previewSize,
                               height: previewSize,
@@ -961,7 +1157,6 @@ class _TileFormDialogState extends State<TileFormDialog> {
                               ),
                             ),
 
-                            // Edit overlay
                             Positioned.fill(
                               child: Material(
                                 color: Colors.transparent,
@@ -987,7 +1182,6 @@ class _TileFormDialogState extends State<TileFormDialog> {
                           ],
                         ),
 
-                        // Title preview
                         MediaQuery(
                           data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                           child: SizedBox(
@@ -1016,25 +1210,22 @@ class _TileFormDialogState extends State<TileFormDialog> {
 
                     const SizedBox(width: 24),
 
-                    // Form fields
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Title field
                           TextFormField(
                             controller: _titleController,
                             decoration: const InputDecoration(
                               labelText: 'Title',
                               border: OutlineInputBorder(),
                             ),
-                            onChanged: (_) => setState(() {}), // Update preview
+                            onChanged: (_) => setState(() {}),
                             validator: (value) =>
                             (value?.isEmpty ?? true) ? 'Please enter a title' : null,
                           ),
                           const SizedBox(height: 16),
 
-                          // URL field
                           TextFormField(
                             controller: _urlController,
                             decoration: const InputDecoration(
@@ -1055,7 +1246,6 @@ class _TileFormDialogState extends State<TileFormDialog> {
 
                 const SizedBox(height: 24),
 
-                // Action buttons with fixed sizing
                 MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                   child: Row(
@@ -1086,4 +1276,4 @@ class _TileFormDialogState extends State<TileFormDialog> {
       ),
     );
   }
-}//
+}
