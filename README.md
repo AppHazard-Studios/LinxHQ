@@ -56,18 +56,6 @@ Works on **any Android-based car tablet** or head unit that supports sideloading
 
 ## 📦 Download
 
-<a href="https://github.com/AppHazard-Studios/LinksHQ">
-    <img src="https://github.com/AppHazard-Studios/LinksHQ/blob/main/assets/googleplay.png?raw=true"
-    alt="Get it on Google Play"
-    height="70">
-</a>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/AppHazard-Studios/LinksHQ">
-    <img src="https://github.com/AppHazard-Studios/LinksHQ/blob/main/assets/get-it-on.png?raw=true"
-    alt="Get it on F-Droid"
-    height="70">
-</a>
-
 > _Links will be available once the app is published._
 
 ---
