@@ -98,22 +98,22 @@ class Tile {
   });
 
   factory Tile.fromJson(Map<String, dynamic> json) => Tile(
-    id: json['id'],
-    title: json['title'],
-    url: json['url'],
-    iconPath: json['iconPath'],
-    dominantEdgeColor: json['dominantEdgeColor'] != null
-        ? Color(json['dominantEdgeColor'])
-        : null,
-  );
+        id: json['id'],
+        title: json['title'],
+        url: json['url'],
+        iconPath: json['iconPath'],
+        dominantEdgeColor: json['dominantEdgeColor'] != null
+            ? Color(json['dominantEdgeColor'])
+            : null,
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'url': url,
-    'iconPath': iconPath,
-    'dominantEdgeColor': dominantEdgeColor?.value,
-  };
+        'id': id,
+        'title': title,
+        'url': url,
+        'iconPath': iconPath,
+        'dominantEdgeColor': dominantEdgeColor?.value,
+      };
 }
 
 class HomePage extends StatefulWidget {
@@ -126,14 +126,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Constants - more adaptive to screen sizes
   static const int tilesPerRow = 5; // Default tiles per row
-  static const double minAspectRatioForDoubleColumn = 1.2; // Use aspect ratio instead of fixed height
-  static const double minTileSize = 100.0; // Minimum size for tiles to be usable
+// Use aspect ratio instead of fixed height
+// Minimum size for tiles to be usable
 
   // State variables
   List<Tile> _tiles = [];
   bool _isLoading = true;
   bool _isEditMode = false;
-  bool _useDoubleColumn = true; // Default to double column, will be adjusted based on screen dimensions
+  bool _useDoubleColumn =
+      true; // Default to double column, will be adjusted based on screen dimensions
 
   // Controllers
   late final PageController _pageController;
@@ -336,7 +337,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Center(
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add, size: 50, color: Color(0xFFFFFFFF)), // Reduced from 50
+                icon: const Icon(Icons.add,
+                    size: 50, color: Color(0xFFFFFFFF)), // Reduced from 50
                 onPressed: () async {
                   if (_isEditMode) {
                     setState(() {
@@ -399,13 +401,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             double titleHeight = 50.0; // Increased from 36.0
 
             // Maximum available height for content
-            double maxRowHeight = (safeHeight - (screenPadding * 2) - tileSpacing) / rowCount;
+            double maxRowHeight =
+                (safeHeight - (screenPadding * 2) - tileSpacing) / rowCount;
 
             // Height available for the actual tile (minus title)
             double availableTileHeight = maxRowHeight - titleHeight;
 
             // Width per tile
-            double availableTileWidth = (availableWidth - (tileSpacing * (itemsPerRow - 1))) / itemsPerRow;
+            double availableTileWidth =
+                (availableWidth - (tileSpacing * (itemsPerRow - 1))) /
+                    itemsPerRow;
 
             // Use smaller dimension to ensure square tiles
             tileSize = min(availableTileWidth, availableTileHeight);
@@ -422,10 +427,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             }
 
             // For single column, we have more height to work with
-            double availableTileWidth = (availableWidth - (tileSpacing * (itemsPerRow - 1))) / itemsPerRow;
+            double availableTileWidth =
+                (availableWidth - (tileSpacing * (itemsPerRow - 1))) /
+                    itemsPerRow;
 
             // Height available after accounting for title and padding
-            double availableHeight = safeHeight - (screenPadding * 2) - titleHeight;
+            double availableHeight =
+                safeHeight - (screenPadding * 2) - titleHeight;
 
             // Use the smaller dimension to keep tiles square
             tileSize = min(availableTileWidth, availableHeight);
@@ -440,7 +448,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           // Calculate pages
           final pages = <List<Tile>>[];
           for (int i = 0; i < _tiles.length; i += tilesPerPage) {
-            final end = i + tilesPerPage < _tiles.length ? i + tilesPerPage : _tiles.length;
+            final end = i + tilesPerPage < _tiles.length
+                ? i + tilesPerPage
+                : _tiles.length;
             pages.add(_tiles.sublist(i, end));
           }
           if (pages.isEmpty) pages.add([]);
@@ -457,19 +467,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       padding: EdgeInsets.all(screenPadding),
                       child: useDoubleColumn
                           ? _buildDoubleColumnLayout(
-                        pages[pageIndex],
-                        pageIndex * tilesPerPage,
-                        itemsPerRow,
-                        tileSize,
-                        tileSpacing,
-                      )
+                              pages[pageIndex],
+                              pageIndex * tilesPerPage,
+                              itemsPerRow,
+                              tileSize,
+                              tileSpacing,
+                            )
                           : _buildSingleColumnLayout(
-                        pages[pageIndex],
-                        pageIndex * tilesPerPage,
-                        itemsPerRow,
-                        tileSize,
-                        tileSpacing,
-                      ),
+                              pages[pageIndex],
+                              pageIndex * tilesPerPage,
+                              itemsPerRow,
+                              tileSize,
+                              tileSpacing,
+                            ),
                     );
                   },
                 ),
@@ -484,12 +494,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Build a double column layout (2 rows)
   // Build a double column layout (2 rows)
   Widget _buildDoubleColumnLayout(
-      List<Tile> pageTiles,
-      int startIndex,
-      int itemsPerRow,
-      double tileSize,
-      double tileSpacing,
-      ) {
+    List<Tile> pageTiles,
+    int startIndex,
+    int itemsPerRow,
+    double tileSize,
+    double tileSpacing,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -525,12 +535,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Build a single column layout (1 row)
   // Build a single column layout (1 row)
   Widget _buildSingleColumnLayout(
-      List<Tile> pageTiles,
-      int startIndex,
-      int itemsPerRow,
-      double tileSize,
-      double tileSpacing,
-      ) {
+    List<Tile> pageTiles,
+    int startIndex,
+    int itemsPerRow,
+    double tileSize,
+    double tileSpacing,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -552,13 +562,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   // Build a row of tiles with consistent spacing
   List<Widget> _buildTileRow(
-      List<Tile> pageTiles,
-      int startIndex,
-      int rowOffset,
-      int itemsPerRow,
-      double tileSize,
-      double tileSpacing,
-      ) {
+    List<Tile> pageTiles,
+    int startIndex,
+    int rowOffset,
+    int itemsPerRow,
+    double tileSize,
+    double tileSpacing,
+  ) {
     List<Widget> rowTiles = [];
 
     for (int index = 0; index < itemsPerRow; index++) {
@@ -734,7 +744,8 @@ class _AppTileState extends State<AppTile> {
           int offset = (x + y * width) * 4;
 
           // Check if the pixel is within byte data and isn't fully transparent
-          if (offset + 3 < byteData.lengthInBytes && byteData.getUint8(offset + 3) > 50) {
+          if (offset + 3 < byteData.lengthInBytes &&
+              byteData.getUint8(offset + 3) > 50) {
             // Create a color from RGB values (using full opacity)
             final color = Color.fromARGB(
               255,
@@ -753,7 +764,8 @@ class _AppTileState extends State<AppTile> {
             );
 
             visibleColors.add(color);
-            colorCounts[simplifiedColor] = (colorCounts[simplifiedColor] ?? 0) + 1;
+            colorCounts[simplifiedColor] =
+                (colorCounts[simplifiedColor] ?? 0) + 1;
           }
         }
       }
@@ -773,7 +785,9 @@ class _AppTileState extends State<AppTile> {
         // For colors like YouTube red that are very saturated,
         // find an actual instance of this color family from our samples
         if (visibleColors.isNotEmpty &&
-            (dominantColor.red > 200 || dominantColor.green > 200 || dominantColor.blue > 200)) {
+            (dominantColor.red > 200 ||
+                dominantColor.green > 200 ||
+                dominantColor.blue > 200)) {
           // Find closest matching real color from our samples
           for (var color in visibleColors) {
             if ((color.red ~/ 10) * 10 == dominantColor.red &&
@@ -796,15 +810,20 @@ class _AppTileState extends State<AppTile> {
   @override
   Widget build(BuildContext context) {
     // Adaptive font size based on tile size
-    final fontSize = widget.size < 80 ? 18.0 :
-    widget.size < 100 ? 22.0 :
-    widget.size < 120 ? 26.0 :
-    30.0;
+    final fontSize = widget.size < 80
+        ? 18.0
+        : widget.size < 100
+            ? 22.0
+            : widget.size < 120
+                ? 26.0
+                : 30.0;
 
     // Determine title height based on font size
-    final titleHeight = fontSize <= 22 ? 40.0 :
-    fontSize <= 26 ? 46.0 :
-    50.0;
+    final titleHeight = fontSize <= 22
+        ? 40.0
+        : fontSize <= 26
+            ? 46.0
+            : 50.0;
 
     // Total height includes adjusted title height
     return SizedBox(
@@ -848,7 +867,6 @@ class _AppTileState extends State<AppTile> {
                     ),
                   ),
                 ),
-
                 if (widget.isEditMode)
                   Positioned.fill(
                     child: Container(
@@ -874,7 +892,6 @@ class _AppTileState extends State<AppTile> {
                                   ),
                                 ),
                               ),
-
                               GestureDetector(
                                 onTap: widget.onDelete,
                                 child: Container(
@@ -954,8 +971,11 @@ class _AppTileState extends State<AppTile> {
         child: Icon(
           Icons.link_outlined,
           // Adaptive icon size
-          size: widget.size < 80 ? 30 :
-          widget.size < 120 ? 40 : 60,
+          size: widget.size < 80
+              ? 30
+              : widget.size < 120
+                  ? 40
+                  : 60,
           color: Colors.white70,
         ),
       ),
@@ -1035,7 +1055,8 @@ class _TileFormDialogState extends State<TileFormDialog> {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final destinationPath = path.join(directory.path, 'linxhq_icons', fileName);
+      final destinationPath =
+          path.join(directory.path, 'linxhq_icons', fileName);
 
       final dir = Directory(path.dirname(destinationPath));
       if (!dir.existsSync()) {
@@ -1114,11 +1135,11 @@ class _TileFormDialogState extends State<TileFormDialog> {
                   data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                   child: Text(
                     isEditing ? 'Edit Tile' : 'Add New Tile',
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1145,18 +1166,17 @@ class _TileFormDialogState extends State<TileFormDialog> {
                                 child: _iconFile != null
                                     ? Image.file(_iconFile!, fit: BoxFit.cover)
                                     : Container(
-                                  color: const Color(0xFF2C2C2E),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.link_outlined,
-                                      size: 50,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ),
+                                        color: const Color(0xFF2C2C2E),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.link_outlined,
+                                            size: 50,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ),
                               ),
                             ),
-
                             Positioned.fill(
                               child: Material(
                                 color: Colors.transparent,
@@ -1181,9 +1201,9 @@ class _TileFormDialogState extends State<TileFormDialog> {
                             ),
                           ],
                         ),
-
                         MediaQuery(
-                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          data: MediaQuery.of(context)
+                              .copyWith(textScaleFactor: 1.0),
                           child: SizedBox(
                             height: 36,
                             child: Padding(
@@ -1191,7 +1211,9 @@ class _TileFormDialogState extends State<TileFormDialog> {
                               child: SizedBox(
                                 width: previewSize,
                                 child: Text(
-                                  _titleController.text.isEmpty ? 'Title' : _titleController.text,
+                                  _titleController.text.isEmpty
+                                      ? 'Title'
+                                      : _titleController.text,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -1207,9 +1229,7 @@ class _TileFormDialogState extends State<TileFormDialog> {
                         ),
                       ],
                     ),
-
                     const SizedBox(width: 24),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1221,11 +1241,11 @@ class _TileFormDialogState extends State<TileFormDialog> {
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (_) => setState(() {}),
-                            validator: (value) =>
-                            (value?.isEmpty ?? true) ? 'Please enter a title' : null,
+                            validator: (value) => (value?.isEmpty ?? true)
+                                ? 'Please enter a title'
+                                : null,
                           ),
                           const SizedBox(height: 16),
-
                           TextFormField(
                             controller: _urlController,
                             decoration: const InputDecoration(
@@ -1233,8 +1253,10 @@ class _TileFormDialogState extends State<TileFormDialog> {
                               border: OutlineInputBorder(),
                             ),
                             validator: (value) {
-                              if (value?.isEmpty ?? true) return 'Please enter a URL';
-                              if (!value!.contains('.')) return 'Please enter a valid URL';
+                              if (value?.isEmpty ?? true)
+                                return 'Please enter a URL';
+                              if (!value!.contains('.'))
+                                return 'Please enter a valid URL';
                               return null;
                             },
                           ),
@@ -1243,16 +1265,15 @@ class _TileFormDialogState extends State<TileFormDialog> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
                 MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: _isLoading ? null : () => Navigator.pop(context),
+                        onPressed:
+                            _isLoading ? null : () => Navigator.pop(context),
                         child: const Text('CANCEL'),
                       ),
                       const SizedBox(width: 12),
@@ -1260,10 +1281,11 @@ class _TileFormDialogState extends State<TileFormDialog> {
                         onPressed: _isLoading ? null : _submit,
                         child: _isLoading
                             ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
                             : Text(isEditing ? 'SAVE' : 'ADD'),
                       ),
                     ],
