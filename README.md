@@ -1,18 +1,26 @@
 # LinksHQ
 **A clean, car-friendly web launcher for Android tablets**
 
-<!-- Updated App Icon -->
-![LinksHQ App Icon](https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/icon/ic_launcher.png?raw=true)
+<p align="center">
+  <img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/icon/ic_launcher.png?raw=true" alt="LinksHQ App Icon" width="150"/>
+</p>
 
 ## 📸 App Previews
-<!-- Home Screen (most important) -->
-<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/homescreen-edit.png?raw=true" width="100%"/>
 
-<!-- Edit Screen -->
-<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/edit-edit.png?raw=true" width="100%"/>
+<p align="center">
+  <!-- Home Screen (most important) -->
+  <img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/homescreen-edit.png?raw=true" alt="Home Screen" width="80%"/>
+</p>
 
-<!-- Add Edit Screen -->
-<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/add-edit.png?raw=true" width="100%"/>
+<p align="center">
+  <!-- Add Edit Screen -->
+  <img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/add-edit.png?raw=true" alt="Add Edit Screen" width="80%"/>
+</p>
+
+<p align="center">
+  <!-- Edit Screen -->
+  <img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/edit-edit.png?raw=true" alt="Edit Screen" width="80%"/>
+</p>
 
 ---
 
