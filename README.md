@@ -1,8 +1,18 @@
 # LinksHQ
 **A clean, car-friendly web launcher for Android tablets**
 
-![LinksHQ App Icon](https://github.com/AppHazard-Studios/LinksHQ/blob/main/Screenshots/icon.png?raw=true)  
-<img src="https://github.com/AppHazard-Studios/LinksHQ/blob/main/Screenshots/main-ui.png?raw=true" width="100%"/>
+<!-- Updated App Icon -->
+![LinksHQ App Icon](https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/icon/ic_launcher.png?raw=true)
+
+## 📸 App Previews
+<!-- Home Screen (most important) -->
+<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/homescreen-edit.png?raw=true" width="100%"/>
+
+<!-- Edit Screen -->
+<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/edit-edit.png?raw=true" width="100%"/>
+
+<!-- Add Edit Screen -->
+<img src="https://github.com/AppHazard-Studios/LinxHQ/blob/master/assets/screenshots/edits/add-edit.png?raw=true" width="100%"/>
 
 ---
 
